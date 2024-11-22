@@ -19,5 +19,16 @@ const assignment = {
       res.json(assignment);
     });
     
+    app.get("/lab5/assignment/score/:newScore", (req, res) => {
+      const { newScore } = req.params;
+      assignment.score = newScore;
+      res.json(assignment);
+    });
+  
+    app.get("/lab5/assignment/complete/:newComplete", (req, res) => {
+      const { newComplete } = req.params;
+      assignment.completed = newComplete;
+      res.json(assignment);
+    });
   };
   
