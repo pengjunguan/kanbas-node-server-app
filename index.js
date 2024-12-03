@@ -11,31 +11,47 @@ import AssignmentRoutes from './Kanbas/Assignments/routes.js';
 import EnrollmentsRoutes from './Kanbas/Enrollments/routes.js';
 import mongoose from "mongoose";
 
+// MongoDB Connection
+const CONNECTION_STRING =
+  process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kanbas";
+mongoose
+  .connect(CONNECTION_STRING, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kanbas"
-mongoose.connect(CONNECTION_STRING);
+const app = express();
 
-
-const app = express()
+// CORS Configuration
+const allowedOrigins = [
+  "http://localhost:3000", // 本地开发环境
+  "https://illustrious-pothos-3ccf8b.netlify.app", // 生产环境
+];
 app.use(
-  cors({   
+  cors({
     credentials: true,
-    origin: process.env.NETLIFY_URL || "https://illustrious-pothos-3ccf8b.netlify.app",
- })
-);  
+    origin: function (origin, callback) {
+      if (allowedOrigins.includes(origin) || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
+
+// Session Configuration
 const sessionOptions = {
-    secret: process.env.SESSION_SECRET || "kanbas",
-    resave: false,
-    saveUninitialized: false,
-  };
-  if (process.env.NODE_ENV !== "development") {
-    sessionOptions.proxy = true;
-    sessionOptions.cookie = {
-      sameSite: "none",
-      secure: true,
-      domain: process.env.NODE_SERVER_DOMAIN,
-    };
-  }
+  secret: process.env.SESSION_SECRET || "kanbas",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    sameSite: "none",
+    secure: process.env.NODE_ENV !== "development", // 生产环境启用 secure
+  },
+};
+if (process.env.NODE_ENV !== "development") {
+  sessionOptions.proxy = true;
+}
   app.use(session(sessionOptions));
   
   
