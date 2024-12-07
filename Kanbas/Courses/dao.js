@@ -38,3 +38,9 @@ export function updateCourse(courseId, courseUpdates) {
     // return course;
 }
   
+
+
+export async function findUsersForCourse(courseId) {
+  const enrollments = await enrollmentModel.find({ course: courseId }).populate("user");
+  return enrollments.map((enrollment) => enrollment.user); 
+}
